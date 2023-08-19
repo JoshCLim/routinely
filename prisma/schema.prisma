@@ -68,3 +68,39 @@ model VerificationToken {
 
     @@unique([identifier, token])
 }
+
+model TaskList {
+    id          String      @id @default(cuid())
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    title       String
+    colour      String      @db.Char(6)
+    tasks       Task[]
+}
+
+model Task {
+    id          Int         @id @default(autoincrement())
+    listId      String
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    title       String
+    description String      @db.Text
+    importance  Int         @db.UnsignedTinyInt @default(0)
+    due         DateTime
+    tags        Tag[]
+    list        TaskList    @relation(fields: [listId], references: [id])
+    
+    parentId    Int?
+    parent      Task?       @relation("Subtasks", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    children    Task[]      @relation("Subtasks")
+
+    @@index([listId])
+    @@index([parentId])
+}
+
+model Tag {
+    id          String      @id @default(cuid())
+    name        String
+    colour      String      @db.Char(6)
+    tasks       Task[]
+}
