@@ -44,12 +44,40 @@ export const authOptions: NextAuthOptions = {
         id: user.id,
       },
     }),
+    signIn: async ({ user, account }) => {
+      // Initial sign in
+      if (account && user) {
+        const user = await prisma.account.findFirst({
+          where: {
+            userId: account.userId,
+          },
+        });
+        await prisma.account.update({
+          where: {
+            id: user?.id,
+          },
+          data: {
+            refresh_token: account.refresh_token,
+          },
+        });
+      }
+      return true;
+    },
   },
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          scope:
+            "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar",
+          response_type: "code",
+          access_type: "offline",
+          // prompt: "consent",
+        },
+      },
     }),
     /**
      * ...add more providers here.

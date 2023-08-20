@@ -57,10 +57,18 @@ export default function Home() {
 function AuthShowcase() {
   const { data: sessionData } = useSession();
 
+  console.log(sessionData);
+
   const { data: secretMessage } = api.example.getSecretMessage.useQuery(
     undefined, // no input
     { enabled: sessionData?.user !== undefined }
   );
+
+  // const getCalendarInfo = () => {
+  const { data: res } = api.googleCalendar.getEvents.useQuery();
+  // const data = await res.json();
+  console.log(res);
+  // };
 
   return (
     <div className="flex flex-col items-center justify-center gap-4">
@@ -70,7 +78,9 @@ function AuthShowcase() {
       </p>
       <button
         className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={sessionData ? () => void signOut() : () => void signIn()}
+        onClick={
+          sessionData ? () => void signOut() : () => void signIn("google")
+        }
       >
         {sessionData ? "Sign out" : "Sign in"}
       </button>
