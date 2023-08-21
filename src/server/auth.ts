@@ -44,25 +44,25 @@ export const authOptions: NextAuthOptions = {
         id: user.id,
       },
     }),
-    signIn: async ({ user, account }) => {
-      // Initial sign in
-      if (account && user) {
-        const user = await prisma.account.findFirst({
-          where: {
-            userId: account.userId,
-          },
-        });
-        await prisma.account.update({
-          where: {
-            id: user?.id,
-          },
-          data: {
-            refresh_token: account.refresh_token,
-          },
-        });
-      }
-      return true;
-    },
+    // signIn: async ({ user, account }) => {
+    //   // Initial sign in
+    //   if (account && user) {
+    //     const u = await prisma.account.findFirst({
+    //       where: {
+    //         userId: account.userId,
+    //       },
+    //     });
+    //     await prisma.account.update({
+    //       where: {
+    //         id: u?.id,
+    //       },
+    //       data: {
+    //         refresh_token: account.refresh_token,
+    //       },
+    //     });
+    //   }
+    //   return true;
+    // },
   },
   adapter: PrismaAdapter(prisma),
   providers: [

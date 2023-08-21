@@ -25,6 +25,8 @@ const config = {
       },
     ],
   },
+
+  pageExtensions: ["page.tsx", "page.ts"],
 };
 
 export default config;

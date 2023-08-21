@@ -7,7 +7,7 @@
  * need to use are documented accordingly near the end.
  */
 
-import { initTRPC, TRPCError } from "@trpc/server";
+import { type inferAsyncReturnType, initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
 import superjson from "superjson";
@@ -26,6 +26,8 @@ import { prisma } from "~/server/db";
 interface CreateContextOptions {
   session: Session | null;
 }
+
+export type ContextTRPC = inferAsyncReturnType<typeof createTRPCContext>;
 
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use it, you can export

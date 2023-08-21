@@ -15,12 +15,6 @@ datasource db {
     relationMode = "prisma"
 }
 
-model Example {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-}
-
 // Necessary for Next auth
 model Account {
     id                String  @id @default(cuid())
@@ -59,6 +53,9 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    tasksLists    TaskList[]
+    tasks         Task[]
+    tags          Tag[]
 }
 
 model VerificationToken {
@@ -71,36 +68,56 @@ model VerificationToken {
 
 model TaskList {
     id          String      @id @default(cuid())
+    userId      String
+    owner       User        @relation(fields: [userId], references: [id])
     createdAt   DateTime    @default(now())
     updatedAt   DateTime    @updatedAt
     title       String
     colour      String      @db.Char(6)
     tasks       Task[]
+
+    @@index([userId])
 }
 
 model Task {
     id          Int         @id @default(autoincrement())
-    listId      String
+    listId      String?
+    userId      String
+    owner       User        @relation(fields: [userId], references: [id])
+    list        TaskList?   @relation(fields: [listId], references: [id])
     createdAt   DateTime    @default(now())
     updatedAt   DateTime    @updatedAt
     title       String
     description String      @db.Text
     importance  Int         @db.UnsignedTinyInt @default(0)
-    due         DateTime
+    due         DateTime?
     tags        Tag[]
-    list        TaskList    @relation(fields: [listId], references: [id])
+    complete    Boolean     @default(false)
     
-    parentId    Int?
-    parent      Task?       @relation("Subtasks", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-    children    Task[]      @relation("Subtasks")
+    projectId   String?
+    project     Project?    @relation(fields: [projectId], references: [id])
 
     @@index([listId])
-    @@index([parentId])
+    @@index([projectId])
+    @@index([userId])
 }
 
 model Tag {
     id          String      @id @default(cuid())
+    userId      String
+    owner       User        @relation(fields: [userId], references: [id])
     name        String
     colour      String      @db.Char(6)
     tasks       Task[]
+
+    @@index([userId])
+}
+
+model Project {
+    id          String      @id @default(cuid())
+    name        String
+    description String      @db.Text
+    due         DateTime
+    tasks       Task[]
+    complete    Boolean     @default(false)
 }

@@ -1,4 +1,3 @@
-import Head from "next/head";
 import Image from "next/image";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -15,11 +14,6 @@ import {
 export default function Home() {
   return (
     <>
-      <Head>
-        <title>Routinely</title>
-        <meta name="description" content="Live you life with purpose." />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
       <main className="flex min-h-screen flex-col items-center justify-start bg-white">
         <Navbar />
         <header className="flex h-screen max-h-[800px] w-full flex-row justify-center gap-24">

@@ -1,5 +1,6 @@
 import { createTRPCRouter } from "~/server/api/trpc";
 import { googleCalendarRouter } from "./routers/googleCalendar";
+import { tasksRouter } from "./routers/tasks";
 
 /**
  * This is the primary router for your server.
@@ -8,6 +9,7 @@ import { googleCalendarRouter } from "./routers/googleCalendar";
  */
 export const appRouter = createTRPCRouter({
   googleCalendar: googleCalendarRouter,
+  tasks: tasksRouter,
 });
 
 // export type definition of API
