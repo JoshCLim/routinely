@@ -92,6 +92,9 @@ const Task = (task: RouterOutputs["tasks"]["getTasks"][number]) => {
   const { mutate: deleteTaskMutate } = api.tasks.deleteTask.useMutation({
     onSuccess: () => void ctx.tasks.getTasks.invalidate(),
   });
+  const { mutate: editTaskMutate } = api.tasks.updateTask.useMutation({
+    onSuccess: () => void ctx.tasks.getTasks.invalidate(),
+  });
   // const {mutate: editTaskTitle} =
   const [editing, setEditing] = useState<boolean>(false);
   const title = useRef<string>(task.title);
@@ -114,7 +117,7 @@ const Task = (task: RouterOutputs["tasks"]["getTasks"][number]) => {
     e.preventDefault();
     setEditing(false);
 
-    console.log(title.current);
+    editTaskMutate({ title: title.current, taskId: task.id });
   };
 
   return (
@@ -138,7 +141,6 @@ const Task = (task: RouterOutputs["tasks"]["getTasks"][number]) => {
           onChange={(e) => (title.current = e.target.value)}
           className="flex-grow outline-none"
         />
-        {/* <p contentEditable={editing}>{task.title}</p> */}
       </div>
       <div className="hidden flex-row items-center gap-3 group-hover/task:flex">
         <button
