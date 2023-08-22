@@ -13,21 +13,12 @@ import { Separator } from "~/components/ui/separator";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
-  CalendarIcon,
   CalendarCheck,
   Edit,
-  LayoutDashboardIcon,
-  ListTodoIcon,
   Search,
-  Settings,
   Trash,
+  CalendarClock,
 } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
 import ContentEditable from "react-contenteditable";
 import {
   Popover,
@@ -35,6 +26,7 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { Calendar } from "~/components/ui/calendar";
+import { Sidebar } from "../../components/sidebar";
 
 export default function Dashboard() {
   const { data: calendarIds } = api.googleCalendar.getCalendarIds.useQuery();
@@ -266,13 +258,14 @@ const DaySummary = () => {
 
   return (
     <div className="flex flex-row gap-3">
-      <div className="flex min-w-[300px] flex-grow flex-row items-center justify-between rounded-3xl rounded-r-2xl border-2 bg-muted p-10">
+      <div className="relative z-0 flex min-w-[300px] flex-grow flex-row items-center justify-between rounded-3xl rounded-r-2xl border-2 bg-muted p-10">
         <button
           onClick={() =>
             setCurrDate((p) => moment(p).subtract({ days: 1 }).toDate())
           }
+          className="text-[#bbb] outline-none transition-colors hover:text-[#333]"
         >
-          <ArrowLeftIcon color="#bbb" />
+          <ArrowLeftIcon />
         </button>
         <div className="flex flex-col items-center justify-center">
           <p className="up text-5xl tracking-wide">{currDate.format("ddd")}</p>
@@ -283,9 +276,23 @@ const DaySummary = () => {
           onClick={() =>
             setCurrDate((p) => moment(p).add({ days: 1 }).toDate())
           }
+          className="text-[#bbb] outline-none transition-colors hover:text-[#333]"
         >
-          <ArrowRightIcon color="#bbb" />
+          <ArrowRightIcon />
         </button>
+        {currDate.format("YYYY/MM/DD") !== moment().format("YYYY/MM/DD") && (
+          <button
+            className="absolute bottom-2 left-[8.7rem] right-[8.7rem] z-0 flex items-center justify-center gap-3 rounded-xl bg-[#eee] py-2 transition-colors hover:bg-[#ddd]"
+            onClick={() => {
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              setCurrDate(today);
+            }}
+          >
+            <CalendarClock />
+            Today
+          </button>
+        )}
       </div>
       <div className="flex flex-col gap-3">
         <div className="rounded-4xl flex flex-row items-center justify-center gap-5 rounded-3xl rounded-b-2xl rounded-l-2xl rounded-bl-xl border-2 bg-muted p-10">
@@ -314,69 +321,6 @@ const DaySummary = () => {
         </div>
       </div>
     </div>
-  );
-};
-
-const Sidebar = ({ highlight }: { highlight: string }) => {
-  return (
-    <nav className="fixed left-0 top-0 flex h-screen flex-col border">
-      <SidebarLink
-        label="dashboard"
-        href={"/dashboard"}
-        icon={<LayoutDashboardIcon />}
-        highlight={highlight === "/dashboard"}
-      />
-      <SidebarLink
-        label="tasks"
-        href={"/tasks"}
-        icon={<ListTodoIcon />}
-        highlight={highlight === "/tasks"}
-      />
-      <SidebarLink
-        label="calendar"
-        href={"/calendar"}
-        icon={<CalendarIcon />}
-        highlight={highlight === "/calendar"}
-      />
-      <SidebarLink
-        label="settings"
-        href={"/settings"}
-        icon={<Settings />}
-        highlight={highlight === "/settings"}
-      />
-    </nav>
-  );
-};
-
-const SidebarLink = ({
-  href,
-  icon,
-  label,
-  highlight,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  highlight: boolean;
-}) => {
-  return (
-    <TooltipProvider>
-      <Tooltip delayDuration={100}>
-        <TooltipTrigger>
-          <Link
-            className={`flex aspect-square items-center justify-center border-b p-5 transition-all hover:bg-slate-300 ${
-              highlight && "bg-slate-200"
-            }`}
-            href={href}
-          >
-            {icon}
-          </Link>
-        </TooltipTrigger>
-        <TooltipContent side="right">
-          <p>{label}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
   );
 };
 
