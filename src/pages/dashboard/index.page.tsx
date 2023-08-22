@@ -13,7 +13,8 @@ import { Separator } from "~/components/ui/separator";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
-  Calendar,
+  CalendarIcon,
+  CalendarCheck,
   Edit,
   LayoutDashboardIcon,
   ListTodoIcon,
@@ -28,6 +29,12 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import ContentEditable from "react-contenteditable";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { Calendar } from "~/components/ui/calendar";
 
 export default function Dashboard() {
   const { data: calendarIds } = api.googleCalendar.getCalendarIds.useQuery();
@@ -95,9 +102,9 @@ const Task = (task: RouterOutputs["tasks"]["getTasks"][number]) => {
   const { mutate: editTaskMutate } = api.tasks.updateTask.useMutation({
     onSuccess: () => void ctx.tasks.getTasks.invalidate(),
   });
-  // const {mutate: editTaskTitle} =
   const [editing, setEditing] = useState<boolean>(false);
   const title = useRef<string>(task.title);
+  const [date, setDate] = useState<Date | null>(task.due);
 
   const deleteTask = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
@@ -105,24 +112,26 @@ const Task = (task: RouterOutputs["tasks"]["getTasks"][number]) => {
 
     deleteTaskMutate({ taskId: task.id });
   };
-
   const editTask = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     e.stopPropagation();
-
     setEditing(true);
   };
-
   const handleEditBlur = (e: React.FocusEvent<HTMLElement>) => {
     e.preventDefault();
     setEditing(false);
 
     editTaskMutate({ title: title.current, taskId: task.id });
   };
+  const handleDateChange = (date: Date | null) => {
+    if (!date) return;
+    setDate(date);
+    editTaskMutate({ due: date, taskId: task.id });
+  };
 
   return (
     <div
-      className={`group/task flex cursor-pointer flex-row items-center justify-between gap-3 rounded-xl px-5 py-3 text-lg font-light transition-colors hover:bg-muted ${
+      className={`group/task flex cursor-pointer flex-row items-center justify-between gap-3 rounded-xl px-5 text-lg font-light transition-colors hover:bg-muted ${
         !!task.complete && "text-[#aaa]"
       }`}
     >
@@ -139,10 +148,25 @@ const Task = (task: RouterOutputs["tasks"]["getTasks"][number]) => {
           disabled={!editing}
           onBlur={handleEditBlur}
           onChange={(e) => (title.current = e.target.value)}
-          className="flex-grow outline-none"
+          className={`flex-grow py-3 outline-none ${editing && "text-[#777]"}`}
         />
       </div>
-      <div className="hidden flex-row items-center gap-3 group-hover/task:flex">
+      <div className="invisible flex flex-row items-center gap-3 group-hover/task:visible">
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="text-[#777] transition-all hover:text-[#7795ff]">
+              <CalendarCheck size={20} />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0">
+            <Calendar
+              mode="single"
+              initialFocus
+              selected={date}
+              onSelect={handleDateChange}
+            />
+          </PopoverContent>
+        </Popover>
         <button
           className="text-[#777] transition-all hover:text-[#7a7]"
           onClick={editTask}
@@ -311,7 +335,7 @@ const Sidebar = ({ highlight }: { highlight: string }) => {
       <SidebarLink
         label="calendar"
         href={"/calendar"}
-        icon={<Calendar />}
+        icon={<CalendarIcon />}
         highlight={highlight === "/calendar"}
       />
       <SidebarLink
