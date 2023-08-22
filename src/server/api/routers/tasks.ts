@@ -2,12 +2,13 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { getTodayMidnight } from "../helpers/date";
 import { z } from "zod";
 
-export const tasksRouter = createTRPCRouter({
-  getTasks: protectedProcedure
+const getTasksRouter = createTRPCRouter({
+  byDate: protectedProcedure
     .input(z.object({ date: z.date().optional() }))
     .query(async ({ ctx, input }) => {
       return await ctx.prisma.task.findMany({
         where: {
+          userId: ctx.session.user.id,
           due: input.date ?? getTodayMidnight(),
         },
         orderBy: {
@@ -15,6 +16,24 @@ export const tasksRouter = createTRPCRouter({
         },
       });
     }),
+
+  byList: protectedProcedure
+    .input(z.object({ listId: z.string().or(z.null()) }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.prisma.task.findMany({
+        where: {
+          userId: ctx.session.user.id,
+          listId: input.listId,
+        },
+        orderBy: {
+          due: "asc",
+        },
+      });
+    }),
+});
+
+export const tasksRouter = createTRPCRouter({
+  getTasks: getTasksRouter,
 
   addTask: protectedProcedure
     .input(
@@ -58,7 +77,7 @@ export const tasksRouter = createTRPCRouter({
     .input(z.object({ taskId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       return await ctx.prisma.task.delete({
-        where: { id: input.taskId },
+        where: { id: input.taskId, userId: ctx.session.user.id },
       });
     }),
 
@@ -67,10 +86,10 @@ export const tasksRouter = createTRPCRouter({
       z.object({
         title: z.string().optional(),
         taskId: z.number(),
-        listId: z.string().optional(),
+        listId: z.string().or(z.null()).optional(),
         importance: z.number().optional(),
         description: z.string().optional(),
-        due: z.date().optional(),
+        due: z.date().or(z.null()).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {

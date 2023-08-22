@@ -56,6 +56,7 @@ model User {
     tasksLists    TaskList[]
     tasks         Task[]
     tags          Tag[]
+    projects      Project[]
 }
 
 model VerificationToken {
@@ -73,7 +74,7 @@ model TaskList {
     createdAt   DateTime    @default(now())
     updatedAt   DateTime    @updatedAt
     title       String
-    colour      String      @db.Char(6)
+    colour      String      @db.Char(7)
     tasks       Task[]
 
     @@index([userId])
@@ -107,7 +108,7 @@ model Tag {
     userId      String
     owner       User        @relation(fields: [userId], references: [id])
     name        String
-    colour      String      @db.Char(6)
+    colour      String      @db.Char(7)
     tasks       Task[]
 
     @@index([userId])
@@ -115,9 +116,13 @@ model Tag {
 
 model Project {
     id          String      @id @default(cuid())
+    userId      String
+    owner       User        @relation(fields: [userId], references: [id])
     name        String
     description String      @db.Text
     due         DateTime
     tasks       Task[]
     complete    Boolean     @default(false)
+
+    @@index([userId])
 }

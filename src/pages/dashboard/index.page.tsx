@@ -3,7 +3,6 @@ import { getSession } from "next-auth/react";
 import Head from "next/head";
 import { type RouterOutputs, api } from "~/utils/api";
 import moment from "moment";
-import Link from "next/link";
 import DashboardContextProvider, {
   useDashboardContext,
 } from "./dashboard-context";
@@ -26,7 +25,7 @@ import {
   PopoverTrigger,
 } from "~/components/ui/popover";
 import { Calendar } from "~/components/ui/calendar";
-import { Sidebar } from "../../components/sidebar";
+import { Sidebar } from "~/components/sidebar";
 
 export default function Dashboard() {
   const { data: calendarIds } = api.googleCalendar.getCalendarIds.useQuery();
@@ -83,7 +82,7 @@ const TaskSearch = () => {
   );
 };
 
-const Task = (task: RouterOutputs["tasks"]["getTasks"][number]) => {
+const Task = (task: RouterOutputs["tasks"]["getTasks"]["byDate"][number]) => {
   const ctx = api.useContext();
   const { mutate: markTaskComplete } = api.tasks.markTaskComplete.useMutation({
     onSuccess: () => void ctx.tasks.getTasks.invalidate(),
@@ -94,6 +93,7 @@ const Task = (task: RouterOutputs["tasks"]["getTasks"][number]) => {
   const { mutate: editTaskMutate } = api.tasks.updateTask.useMutation({
     onSuccess: () => void ctx.tasks.getTasks.invalidate(),
   });
+
   const [editing, setEditing] = useState<boolean>(false);
   const title = useRef<string>(task.title);
   const [date, setDate] = useState<Date | null>(task.due);
@@ -130,6 +130,7 @@ const Task = (task: RouterOutputs["tasks"]["getTasks"][number]) => {
       <div className="flex flex-row items-center gap-3">
         <Checkbox
           className="h-6 w-6"
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           checked={task.complete}
           onClick={() => {
             markTaskComplete({ taskId: task.id, complete: !task.complete });
@@ -154,7 +155,11 @@ const Task = (task: RouterOutputs["tasks"]["getTasks"][number]) => {
             <Calendar
               mode="single"
               initialFocus
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
               selected={date}
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
               onSelect={handleDateChange}
             />
           </PopoverContent>
@@ -181,7 +186,7 @@ const TasksList = ({ complete }: { complete: boolean }) => {
   const taskSearch = dashboardContext.getters.taskSearch;
   const date = dashboardContext.getters.currDate;
   const { data: tasks, isLoading: isTasksLoading } =
-    api.tasks.getTasks.useQuery({
+    api.tasks.getTasks.byDate.useQuery({
       date,
     });
 
@@ -207,7 +212,7 @@ const TasksWizard = () => {
   const dashboardContext = useDashboardContext();
   const date = dashboardContext.getters.currDate;
   const { data: tasks, isLoading: isTasksLoading } =
-    api.tasks.getTasks.useQuery({
+    api.tasks.getTasks.byDate.useQuery({
       date,
     });
   const ctx = api.useContext();

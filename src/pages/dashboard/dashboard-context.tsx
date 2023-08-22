@@ -33,7 +33,7 @@ export default function DashboardContextProvider({
   const [currDate, setCurrDate] = useState<Date>(currDay);
   const [taskSearch, setTaskSearch] = useState<string>("");
   const taskCount =
-    api.tasks.getTasks.useQuery({ date: currDate }).data?.length ?? 0;
+    api.tasks.getTasks.byDate.useQuery({ date: currDate }).data?.length ?? 0;
   const projectCount = 0;
 
   const getters = {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   CalendarIcon,
+  KanbanSquare,
   LayoutDashboardIcon,
   ListTodoIcon,
   Settings,
@@ -12,9 +13,19 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 
-export const Sidebar = ({ highlight }: { highlight: string }) => {
+export const Sidebar = ({
+  highlight,
+  fixed = true,
+}: {
+  highlight: string;
+  fixed?: boolean;
+}) => {
   return (
-    <nav className="fixed left-0 top-0 z-50 flex h-screen flex-col border">
+    <nav
+      className={`${
+        fixed ? "fixed" : "relative"
+      } left-0 top-0 z-50 flex h-screen flex-col border bg-white`}
+    >
       <SidebarLink
         label="dashboard"
         href={"/dashboard"}
@@ -26,6 +37,12 @@ export const Sidebar = ({ highlight }: { highlight: string }) => {
         href={"/tasks"}
         icon={<ListTodoIcon />}
         highlight={highlight === "/tasks"}
+      />
+      <SidebarLink
+        label="projects"
+        href={"/projects"}
+        icon={<KanbanSquare />}
+        highlight={highlight === "/projects"}
       />
       <SidebarLink
         label="calendar"
