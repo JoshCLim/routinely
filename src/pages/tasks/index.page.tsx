@@ -206,6 +206,52 @@ const ListTask = (
   );
 };
 
+const ListTaskAddWizard = () => {
+  const ctx = api.useContext();
+  const tasksContext = useTasksContext();
+  const { data: taskList, isLoading: taskListLoading } =
+    api.taskLists.getTaskList.byId.useQuery({
+      listId: tasksContext.getters.currListId,
+    });
+  const [newTaskName, setNewTaskName] = useState<string>("");
+  const { mutate: addTaskMutate, isLoading: isAddingTask } =
+    api.tasks.addTask.useMutation({
+      onSuccess: () => {
+        setNewTaskName("");
+        void ctx.tasks.getTasks.invalidate();
+      },
+    });
+
+  if (taskListLoading) return <></>;
+  if (!taskList) return <></>;
+
+  return (
+    <section className="flex flex-col gap-1">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          addTaskMutate({
+            title: newTaskName,
+            date: null,
+            listId: taskList.id,
+          });
+        }}
+      >
+        <input
+          className="w-full rounded-xl border border-transparent px-5 py-3 text-lg font-light text-[#aaa] outline-none transition-colors hover:bg-[#fdfdfd] focus:border-[#ddd] focus:bg-muted"
+          value={newTaskName}
+          onChange={(e) => setNewTaskName(e.target.value)}
+          type="text"
+          disabled={isAddingTask}
+          placeholder={`+  add task ${
+            taskList.id ? "to " + taskList.title : ""
+          }`}
+        />
+      </form>
+    </section>
+  );
+};
+
 const List = () => {
   const tasksContext = useTasksContext();
   const { data: tasks, isLoading: tasksLoading } =
@@ -224,23 +270,24 @@ const List = () => {
 
   return (
     <div className="fixed left-[28rem] z-0 w-[calc(100%-28rem)] px-16 py-14">
-      <header className="flex flex-row items-center gap-4">
+      <header className="mb-3 flex flex-row items-center gap-4">
         <ListCircle colour={taskList.colour} size={10} />
         <h2 className="text-3xl font-extralight tracking-wide">
           {taskList.title}
         </h2>
       </header>
       <div className="flex w-full flex-row gap-3">
-        {tasks.filter((task) => !task.complete).length === 0 && (
-          <p className="py-4 text-[#aaa]">Add some tasks to get started!</p>
-        )}
-        <div className="flex-grow py-4">
-          {tasks
-            .filter((task) => !task.complete)
-            .map((task) => (
-              <ListTask {...task} key={task.id} />
-            ))}
+        <div className="flex-grow">
+          <ListTaskAddWizard />
+          <div className="my-3 flex-grow">
+            {tasks
+              .filter((task) => !task.complete)
+              .map((task) => (
+                <ListTask {...task} key={task.id} />
+              ))}
+          </div>
         </div>
+
         <Separator orientation="vertical" />
         <div className="flex-grow py-4">
           <h3 className="px-5 text-xl font-extralight italic tracking-wide">

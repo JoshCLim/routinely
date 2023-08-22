@@ -39,8 +39,8 @@ export const tasksRouter = createTRPCRouter({
     .input(
       z.object({
         title: z.string().min(1).max(200),
-        listId: z.string().optional(),
-        date: z.date().optional(),
+        listId: z.string().or(z.null()).optional(),
+        date: z.date().or(z.null()),
         importance: z.number().min(0).max(3).optional(),
       })
     )
@@ -52,7 +52,7 @@ export const tasksRouter = createTRPCRouter({
           listId: input.listId,
           importance: input.importance,
           description: "",
-          due: input.date ?? getTodayMidnight(),
+          due: input.date,
         },
       });
     }),
